@@ -1,1 +1,320 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WireGuard4582</title>
 
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #09091b;
+  color: white;
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+header {
+  padding: 28px 15px;
+  text-align: center;
+  background: linear-gradient(135deg, #681aff, #087bff);
+  border-radius: 0 0 28px 28px;
+}
+
+header h1 {
+  margin: 0 0 10px;
+  font-size: 27px;
+}
+
+header p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.container {
+  width: 92%;
+  max-width: 600px;
+  margin: 25px auto;
+}
+
+.card {
+  padding: 20px;
+  margin-bottom: 18px;
+  border-radius: 20px;
+  background: #15152c;
+  border: 1px solid #5334a5;
+  box-shadow: 0 5px 25px #4217ff18;
+}
+
+h2 {
+  font-size: 17px;
+  color: #b9a0ff;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 13px;
+  color: #d2d2ed;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border-radius: 11px;
+  border: 1px solid #493b80;
+  background: #0b0b1d;
+  color: white;
+  font-size: 14px;
+}
+
+input[type="file"] {
+  font-size: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(100deg, #8a35ff, #087bff);
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+#status {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #101d35;
+  color: #9ecbff;
+  font-size: 13px;
+  line-height: 2;
+  overflow-wrap: anywhere;
+}
+
+#output {
+  display: none;
+  direction: ltr;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 250px;
+  overflow: auto;
+  padding: 12px;
+  background: #080814;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.info {
+  color: #aaaacb;
+  font-size: 12px;
+  line-height: 2;
+}
+
+footer {
+  text-align: center;
+  color: #7777a6;
+  font-size: 12px;
+  padding: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>WireGuard4582</h1>
+  <p>پنل ساز وایرگارد گیمینگ 💜💙</p>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>📂 انتخاب کانفیگ وایرگارد</h2>
+
+    <label for="config">فایل اصلی WireGuard (.conf)</label>
+    <input
+      id="config"
+      type="file"
+      accept=".conf"
+    >
+
+    <div id="status">ابتدا فایل کانفیگ واقعی خودت را انتخاب کن.</div>
+  </section>
+
+  <section class="card">
+    <h2>⚙️ تنظیم کانفیگ</h2>
+
+    <label for="name">نام فایل خروجی</label>
+    <input
+      id="name"
+      type="text"
+      placeholder="WireGuard Gaming"
+    >
+
+    <label for="volume">حجم (گیگابایت)</label>
+    <input
+      id="volume"
+      type="number"
+      min="1"
+      value="4"
+    >
+
+    <label for="days">اعتبار (روز)</label>
+    <input
+      id="days"
+      type="number"
+      min="1"
+      value="30"
+    >
+
+    <button id="build">ساخت فایل وایرگارد</button>
+  </section>
+
+  <section class="card">
+    <h2>📥 دریافت خروجی</h2>
+
+    <pre id="output"></pre>
+
+    <button id="download" disabled>
+      دانلود کانفیگ (.conf)
+    </button>
+
+    <p class="info">
+      فایل خروجی از روی کانفیگ اصلی انتخاب‌شده ساخته می‌شود.
+      برای ایجاد کاربر جدید، محدودیت واقعی حجم و اعتبار،
+      یا ساب فعال، به سرور و سرویس مدیریتی سازگار نیاز است.
+    </p>
+  </section>
+
+</main>
+
+<footer>WireGuard4582 • Purple & Blue</footer>
+
+<script>
+const fileInput = document.getElementById("config");
+const statusBox = document.getElementById("status");
+const output = document.getElementById("output");
+const buildButton = document.getElementById("build");
+const downloadButton = document.getElementById("download");
+
+let originalConfig = "";
+let generatedConfig = "";
+
+fileInput.addEventListener("change", async () => {
+  originalConfig = "";
+  generatedConfig = "";
+  output.style.display = "none";
+  downloadButton.disabled = true;
+
+  const file = fileInput.files[0];
+
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+
+    if (
+      !text.includes("[Interface]") ||
+      !text.includes("[Peer]")
+    ) {
+      statusBox.textContent =
+        "فایل انتخاب شد، اما بخش‌های اصلی کانفیگ پیدا نشدند.";
+      return;
+    }
+
+    originalConfig = text.trim();
+
+    statusBox.textContent =
+      "کانفیگ اصلی خوانده شد: " + file.name;
+
+  } catch (error) {
+    statusBox.textContent =
+      "خواندن فایل ناموفق بود.";
+  }
+});
+
+buildButton.addEventListener("click", () => {
+  if (!originalConfig) {
+    statusBox.textContent =
+      "ابتدا یک فایل معتبر وایرگارد انتخاب کن.";
+    return;
+  }
+
+  const volume = Number(
+    document.getElementById("volume").value
+  );
+
+  const days = Number(
+    document.getElementById("days").value
+  );
+
+  if (
+    !Number.isFinite(volume) ||
+    !Number.isFinite(days) ||
+    volume < 1 ||
+    days < 1
+  ) {
+    statusBox.textContent =
+      "حجم و اعتبار باید عدد مثبت باشند.";
+    return;
+  }
+
+  generatedConfig = originalConfig;
+
+  output.textContent = generatedConfig;
+  output.style.display = "block";
+  downloadButton.disabled = false;
+
+  statusBox.textContent =
+    "فایل خروجی آماده دانلود است. تنظیمات اصلی کانفیگ حفظ شده‌اند.";
+});
+
+downloadButton.addEventListener("click", () => {
+  if (!generatedConfig) return;
+
+  let name = document.getElementById("name").value.trim();
+
+  name = name
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .replace(/\.conf$/i, "");
+
+  if (!name) name = "WireGuard4582";
+
+  const blob = new Blob(
+    [generatedConfig + "\n"],
+    { type: "text/plain;charset=utf-8" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = name + ".conf";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+</script>
+
+</body>
+</html>
